@@ -1,0 +1,47 @@
+name: bot-lenh
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bot-lenh
+  cancel-in-progress: false
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Nghe va tra loi lenh
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+          GMAIL_ACCOUNTS: ${{ secrets.GMAIL_ACCOUNTS }}
+          DEFAULT_TICKERS: ${{ secrets.DEFAULT_TICKERS }}
+        run: python bot_lenh.py
+
+      - name: Luu offset + giu repo song (scheduled workflow bi tat sau 60 ngay im lang)
+        run: |
+          git config user.name "bot-lenh"
+          git config user.email "bot-lenh@users.noreply.github.com"
+          git add offset.json 2>/dev/null || true
+          if [ -z "$(git log --since='40 days ago' -1 --oneline)" ]; then
+            date -u > heartbeat.txt
+            git add heartbeat.txt
+          fi
+          if ! git diff --cached --quiet; then
+            git commit -m "cap nhat offset [skip ci]"
+            git pull --rebase origin main || true
+            git push || true
+          fi
