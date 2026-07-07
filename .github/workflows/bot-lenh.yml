@@ -26,6 +26,7 @@ jobs:
       - name: Nghe va tra loi lenh
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          BAOCAO_BOT_TOKEN: ${{ secrets.BAOCAO_BOT_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
           GMAIL_ACCOUNTS: ${{ secrets.GMAIL_ACCOUNTS }}
           DEFAULT_TICKERS: ${{ secrets.DEFAULT_TICKERS }}
